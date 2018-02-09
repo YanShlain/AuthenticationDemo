@@ -33,6 +33,12 @@ namespace AuthenticationDemo
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services
+                .ConfigurePasswordSettings()
+                .ConfigureLockoutSettings()
+                .ConfigureEmailConfirmation(false);
+
+
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
 
