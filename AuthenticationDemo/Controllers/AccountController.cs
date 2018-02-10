@@ -24,17 +24,20 @@ namespace AuthenticationDemo.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
+            _roleManager = roleManager;
         }
 
         [TempData]
@@ -224,6 +227,7 @@ namespace AuthenticationDemo.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    await AddRoleIfNecessaryAsync(user);
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                     // Send an email with this link
 
@@ -242,6 +246,23 @@ namespace AuthenticationDemo.Controllers
 
             // If we got this far, something failed, redisplay form
             return View(model);
+        }
+
+        private async Task AddRoleIfNecessaryAsync(ApplicationUser user)
+        {
+            string adminRoleName = "Admin";
+            if (!await _roleManager.RoleExistsAsync(adminRoleName))
+            {
+                var adminRole = new IdentityRole(adminRoleName);
+                var result = await _roleManager.CreateAsync(adminRole);
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, adminRoleName);
+                    _logger.LogInformation(3, "Administrator added.");
+                }
+            }
+
+
         }
 
         [HttpPost]
