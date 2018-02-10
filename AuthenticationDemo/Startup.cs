@@ -29,7 +29,12 @@ namespace AuthenticationDemo
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            // My code begin
+//          services
+//             .AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
+
+            services
+                .AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -38,6 +43,10 @@ namespace AuthenticationDemo
                 .ConfigureLockoutSettings()
                 .ConfigureEmailConfirmation(false);
 
+            services
+                .ConfigureCookies();
+
+            // My code ends
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
